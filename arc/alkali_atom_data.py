@@ -133,9 +133,9 @@ class Hydrogen(AlkaliAtom):
         defect = 0.
         return defect
 
-class Caesium(AlkaliAtom):
+class Cesium(AlkaliAtom):
     """
-        Properties of caesium atoms
+        Properties of cesium atoms
     """
 
     # ALL PARAMETERES ARE IN ATOMIC UNITS (HATREE)
@@ -209,7 +209,7 @@ class Caesium(AlkaliAtom):
     dipoleMatrixElementFile = "cs_dipole_matrix_elements.npy"
     quadrupoleMatrixElementFile = "cs_quadrupole_matrix_elements.npy"
 
-    literatureDMEfilename = 'caesium_literature_dme.csv'
+    literatureDMEfilename = 'cesium_literature_dme.csv'
 
     #: levels that are for smaller n than ground level, but are above in energy due to angular part
     extraLevels = [[5,2,2+0.5],[5,2,2-0.5],[5,3,3+0.5],[5,3,3-0.5],\

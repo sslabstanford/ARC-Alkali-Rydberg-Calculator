@@ -1036,8 +1036,8 @@ class AlkaliAtom(object):
                                 [70,0,0.5, 69, 1,1.5, 70,1, 0.5],\\
                                 [70,0,0.5, 70, 1,0.5, 69,1, 0.5]]
 
-                    print(" = = = Caesium = = = ")
-                    atom = Caesium()
+                    print(" = = = Cesium = = = ")
+                    atom = Cesium()
                     for channel in channels:
                         print("%.0f  GHz (mu m)^6" % ( atom.getC6term(*channel) / C_h * 1.e27 ))
 
@@ -1048,7 +1048,7 @@ class AlkaliAtom(object):
 
                 Returns::
 
-                     = = = Caesium = = =
+                     = = = Cesium = = =
                     722  GHz (mu m)^6
                     316  GHz (mu m)^6
                     383  GHz (mu m)^6
@@ -1061,7 +1061,7 @@ class AlkaliAtom(object):
                     437  GHz (mu m)^6
 
                 which is in good agreement with the values cited in the Ref. [#c6r1]_.
-                Small discrepancies for Caesium originate from slightly different
+                Small discrepancies for Cesium originate from slightly different
                 quantum defects used in calculations.
 
 
