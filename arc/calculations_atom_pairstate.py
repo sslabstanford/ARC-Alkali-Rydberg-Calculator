@@ -30,7 +30,7 @@
 
 from __future__ import division, print_function, absolute_import
 
-from math import exp,log,sqrt
+from math import exp,sqrt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 mpl.rcParams['xtick.minor.visible'] = True
@@ -46,28 +46,29 @@ mpl.rcParams['ytick.right'] = True
 mpl.rcParams['font.family'] = 'serif'
 
 import numpy as np
-import re
-from .wigner import Wigner6j,Wigner3j,CG,wignerDmatrix
-from scipy.constants import physical_constants, pi , epsilon_0, hbar
-from scipy.constants import k as C_k
-from scipy.constants import c as C_c
+#import re
+from .wigner import Wigner6j,CG,wignerDmatrix #,Wigner3j
+from scipy.constants import physical_constants, pi #, epsilon_0, hbar
+#from scipy.constants import k as C_k
+#from scipy.constants import c as C_c
 from scipy.constants import h as C_h
 from scipy.constants import e as C_e
 from scipy.optimize import curve_fit
 
 # for matrices
-from numpy import zeros,savetxt, complex64,complex128
-from numpy.linalg import eigvalsh,eig,eigh
+from numpy import zeros #,savetxt, complex64,complex128
+#from numpy.linalg import eigvalsh,eig,eigh
 from numpy.ma import conjugate
 from numpy.lib.polynomial import real
-from scipy.sparse import lil_matrix,csr_matrix
+from scipy.sparse import csr_matrix #, lil_matrix
 from scipy.sparse.linalg import eigsh
-from scipy.special.specfun import fcoef
-from scipy import floor
+#from scipy.special.specfun import fcoef
+#from scipy import floor
 from scipy.special import factorial
 
-from .alkali_atom_functions import *
-from .alkali_atom_functions import _EFieldCoupling,_atomLightAtomCoupling
+#from .alkali_atom_functions import *
+import alkali_atom_functions as aaf
+from .alkali_atom_functions import _atomLightAtomCoupling #, _EFieldCoupling
 from .calculations_atom_single import StarkMap
 
 from matplotlib.colors import LinearSegmentedColormap
@@ -80,6 +81,8 @@ if sys.version_info > (2,):
     xrange = range
 
 import gzip
+import os
+import sqlite3
 
 DPATH = os.path.join(os.path.expanduser('~'), '.arc-data')
 
@@ -381,7 +384,7 @@ class PairStateInteractions:
                                                     self.angularMatrixFile_meta), 'wb')
             np.save(fileHandle,data)
             fileHandle.close()
-        except IOError as e:
+        except IOError:
             print("Error while updating angularMatrix \
                 data meta (description) File "+self.angularMatrixFile_meta)
 
@@ -526,8 +529,8 @@ class PairStateInteractions:
                                          (j1+j2+0.1>self.m1+self.m2) )    ):
 
                                     if debugOutput:
-                                        pairState = "|"+printStateString(n1,l1,j1)+\
-                                                ","+printStateString(n2,l2,j2)+">"
+                                        pairState = "|"+aaf.printStateString(n1,l1,j1)+\
+                                                ","+aaf.printStateString(n2,l2,j2)+">"
                                         print(pairState+("\t EnergyDefect = %.3f GHz" % (ed*1.e-9)))
 
                                     states.append([n1,l1,j1,n2,l2,j2])
@@ -543,7 +546,7 @@ class PairStateInteractions:
 
         if debugOutput:
             print("\tMatrix dimension\t=\t",dimension)
-        m = np.zeros((dimension,dimension),dtype=np.float64)
+#        m = np.zeros((dimension,dimension),dtype=np.float64)
 
         # mat_value, mat_row, mat_column for each sparce matrix describing
         # dipole-dipole, dipole-quadrupole (and quad-dipole) and quadrupole-quadrupole
@@ -575,8 +578,8 @@ class PairStateInteractions:
                                           states[i][3],states[i][4],states[i][5]) / C_h * 1.0e-9\
                  - opZeemanShift
 
-            pairState1 = "|"+printStateString(states[i][0],states[i][1],states[i][2])+\
-                        ","+printStateString(states[i][3],states[i][4],states[i][5])+">"
+            pairState1 = "|"+aaf.printStateString(states[i][0],states[i][1],states[i][2])+\
+                        ","+aaf.printStateString(states[i][3],states[i][4],states[i][5])+">"
 
             states[i].append(ed)  # energy defect of given state
 
@@ -596,8 +599,8 @@ class PairStateInteractions:
 
                 if coupled and (abs(states[i][0]-states[j][0])<=k and\
                                 abs(states[i][3]-states[j][3])<=k ):
-                    pairState2 = "|"+printStateString(states[j][0],states[j][1],states[j][2])+\
-                                ","+printStateString(states[j][3],states[j][4],states[j][5])+">"
+                    pairState2 = "|"+aaf.printStateString(states[j][0],states[j][1],states[j][2])+\
+                                ","+aaf.printStateString(states[j][3],states[j][4],states[j][5])+">"
                     if debugOutput:
                         print(pairState1+" <---> "+pairState2)
 
@@ -782,15 +785,15 @@ class PairStateInteractions:
         # the two atoms
         wgd = wignerDmatrix(theta,phi)
         # state that we are coupling
-        statePart1 = singleAtomState(self.j, self.m1)
-        statePart2 = singleAtomState(self.jj, self.m2)
+        statePart1 = aaf.singleAtomState(self.j, self.m1)
+        statePart2 = aaf.singleAtomState(self.jj, self.m2)
         # rotate individual states
         dMatrix = wgd.get(self.j)
         statePart1 = dMatrix.dot(statePart1)
 
         dMatrix = wgd.get(self.jj)
         statePart2 = dMatrix.dot(statePart2)
-        stateCom = compositeState(statePart1, statePart2)
+        stateCom = aaf.compositeState(statePart1, statePart2)
 
         # any conservation?
         limitBasisToMj = False
@@ -838,23 +841,23 @@ class PairStateInteractions:
                                             n2,l2,j2,self.atom)*(1.0e-9*(1.e6)**3/C_h) # GHz / mum^3
 
 
-                                    pairState2 = "|"+printStateString(n1,l1,j1)+\
-                                        ","+printStateString(n2,l2,j2)+">"
+#                                    pairState2 = "|"+aaf.printStateString(n1,l1,j1)+\
+#                                        ","+aaf.printStateString(n2,l2,j2)+">"
 
                                     # include relevant mj and add contributions
                                     for m1c in np.linspace(j1,-j1,round(1+2*j1)):
                                         for m2c in np.linspace(j2,-j2,round(1+2*j2)):
                                             if ((not limitBasisToMj) or (abs(originalMj-m1c-m2c)==0) ):
                                                 # find angular part
-                                                statePart1 = singleAtomState(j1, m1c)
-                                                statePart2 = singleAtomState(j2, m2c)
+                                                statePart1 = aaf.singleAtomState(j1, m1c)
+                                                statePart2 = aaf.singleAtomState(j2, m2c)
                                                 # rotate individual states
                                                 dMatrix = wgd.get(j1)
                                                 statePart1 = dMatrix.dot(statePart1)
                                                 dMatrix = wgd.get(j2)
                                                 statePart2 = dMatrix.dot(statePart2)
                                                 # composite state of two atoms
-                                                stateCom2 = compositeState(statePart1, statePart2)
+                                                stateCom2 = aaf.compositeState(statePart1, statePart2)
 
                                                 d = self.__getAngularMatrix_M(self.l,self.j,
                                                                                self.ll,self.jj,
@@ -1019,14 +1022,14 @@ class PairStateInteractions:
                 dMatrix2 = wgd.get(self.basisStates[i][6])
 
                 for i in xrange(self.index[ii],self.index[ii+1]):
-                    statePart1 = singleAtomState(self.basisStates[i][2], self.basisStates[i][3])
-                    statePart2 = singleAtomState(self.basisStates[i][6], self.basisStates[i][7])
+                    statePart1 = aaf.singleAtomState(self.basisStates[i][2], self.basisStates[i][3])
+                    statePart2 = aaf.singleAtomState(self.basisStates[i][6], self.basisStates[i][7])
                     # rotate individual states
 
                     statePart1 = dMatrix1.dot(statePart1)
                     statePart2 = dMatrix2.dot(statePart2)
 
-                    stateCom = compositeState(statePart1, statePart2)
+                    stateCom = aaf.compositeState(statePart1, statePart2)
 
                     if (matRIndex==0):
                         zeemanShift = (self.atom.getZeemanEnergyShift(
@@ -1066,14 +1069,14 @@ class PairStateInteractions:
 
 
                         for j in xrange(self.index[jj],self.index[jj+1]):
-                            statePart1 = singleAtomState(self.basisStates[j][2], self.basisStates[j][3])
-                            statePart2 = singleAtomState(self.basisStates[j][6], self.basisStates[j][7])
+                            statePart1 = aaf.singleAtomState(self.basisStates[j][2], self.basisStates[j][3])
+                            statePart2 = aaf.singleAtomState(self.basisStates[j][6], self.basisStates[j][7])
                             # rotate individual states
 
                             statePart1 = dMatrix3.dot(statePart1)
                             statePart2 = dMatrix4.dot(statePart2)
                             # composite state of two atoms
-                            stateCom2 = compositeState(statePart1, statePart2)
+                            stateCom2 = aaf.compositeState(statePart1, statePart2)
 
                             angularFactor = conjugate(stateCom2.T).dot(secondPart)
                             angularFactor = real(angularFactor[0,0])
@@ -1277,7 +1280,7 @@ class PairStateInteractions:
 
                 if previousEigenvectors==[]:
                     previousEigenvectors = np.copy(egvector)
-                    previousEigenvalues = np.copy(ev)
+#                    previousEigenvalues = np.copy(ev)
                 rowPicked = [False for i in range(len(ev))]
                 columnPicked = [False for i in range(len(ev))]
 
@@ -1356,8 +1359,8 @@ class PairStateInteractions:
         commonHeader = "Export from Alkali Rydberg Calculator (ARC) %s.\n" % ts
         commonHeader += ("\n *** Pair State interactions for %s %s m_j = %d/2 , %s m_j = %d/2 pair-state. ***\n\n" %\
                           (self.atom.elementName,
-                        printStateString(self.n, self.l, self.j), int(round(2.*self.m1)),\
-                        printStateString(self.nn, self.ll, self.jj), int(round(2.*self.m2)) ) )
+                        aaf.printStateString(self.n, self.l, self.j), int(round(2.*self.m1)),\
+                        aaf.printStateString(self.nn, self.ll, self.jj), int(round(2.*self.m2)) ) )
         if (self.interactionsUpTo==1):
             commonHeader += " - Pair-state interactions included up to dipole-dipole coupling.\n"
         elif (self.interactionsUpTo==2):
@@ -1372,7 +1375,7 @@ class PairStateInteractions:
                             (self.n-self.nRange,self.n+self.nRange,\
                              self.nn-self.nRange,self.nn+self.nRange)
             commonHeader += "      AND whose orbital angular momentum (l) is in range [%d-%d] (i.e. %s-%s),\n"%\
-                            (0,self.lrange,printStateLetter(0),printStateLetter(self.lrange))
+                            (0,self.lrange,aaf.printStateLetter(0),aaf.printStateLetter(self.lrange))
             commonHeader += "      AND whose pair-state energy difference is at most %.3f GHz\n" %\
                              (self.energyDelta/1.e9)
             commonHeader += "      (energy difference is measured relative to original pair-state).\n"
@@ -1390,7 +1393,7 @@ class PairStateInteractions:
                 commonHeader += (" - State highlighting based on the relative driving strength \n"+\
                 "   to a given energy eigenstate (energy level) from state\n"+\
                 "   %s m_j =%d/2 with polarization q=%d.\n"%\
-                 ( printStateString(*self.drivingFromState[0:3]),\
+                 ( aaf.printStateString(*self.drivingFromState[0:3]),\
                  int(round(2.*self.drivingFromState[3])),
                  self.drivingFromState[4]))
 
@@ -1458,8 +1461,8 @@ class PairStateInteractions:
 
     def _addState(self,n1,l1,j1,mj1,n2,l2,j2,mj2):
         return "|%s %d/2,%s %d/2\\rangle" %\
-             (printStateStringLatex(n1, l1, j1),int(2*mj1),\
-              printStateStringLatex(n2, l2, j2),int(2*mj2))
+             (aaf.printStateStringLatex(n1, l1, j1),int(2*mj1),\
+              aaf.printStateStringLatex(n2, l2, j2),int(2*mj2))
 
     def plotLevelDiagram(self,  highlightColor='red'):
         """
@@ -1513,9 +1516,9 @@ class PairStateInteractions:
         if (self.drivingFromState[0] == 0):
             # colouring is based on the contribution of the original pair state here
             cb.set_label(r"$|\langle %s m_j=%d/2 , %s m_j=%d/2 | \mu \rangle |^2$" % \
-                                 (printStateStringLatex(self.n, self.l,self.j),\
+                                 (aaf.printStateStringLatex(self.n, self.l,self.j),\
                                   int(round(2.*self.m1,0)),\
-                                  printStateStringLatex(self.nn, self.ll,self.jj),\
+                                  aaf.printStateStringLatex(self.nn, self.ll,self.jj),\
                                   int(round(2.*self.m2,0)) ) )
         else:
             # colouring is based on the coupling to different states

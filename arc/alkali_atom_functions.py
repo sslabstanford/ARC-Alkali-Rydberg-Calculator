@@ -13,34 +13,34 @@ labels etc.
 
 from __future__ import division, print_function, absolute_import
 
-from math import exp,log,sqrt
+from math import exp,sqrt
 # for web-server execution, uncomment the following two lines
 #import matplotlib
 #matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import re
 import shutil
 
-from .wigner import Wigner6j,Wigner3j,wignerD,CG,wignerDmatrix
+from .wigner import Wigner6j,Wigner3j,CG,wignerDmatrix #, wignerD
 from scipy.constants import physical_constants, pi , epsilon_0, hbar
 from scipy.constants import k as C_k
 from scipy.constants import c as C_c
 from scipy.constants import h as C_h
 from scipy.constants import e as C_e
 from scipy.constants import m_e as C_m_e
-from scipy.optimize import curve_fit
+#from scipy.optimize import curve_fit
 
 # for matrices
-from numpy import zeros,savetxt, complex64,complex128
-from numpy.linalg import eigvalsh,eig,eigh
-from numpy.ma import conjugate
-from numpy.lib.polynomial import real
+from numpy import zeros #, savetxt, complex64,complex128
+#from numpy.linalg import eigvalsh,eig,eigh
+#from numpy.ma import conjugate
+#from numpy.lib.polynomial import real
 
 from scipy.sparse import csr_matrix
-from scipy.sparse import kron as kroneckerp
-from scipy.sparse.linalg import eigsh
-from scipy.special.specfun import fcoef
+#from scipy.sparse import kron as kroneckerp
+#from scipy.sparse.linalg import eigsh
+#from scipy.special.specfun import fcoef
 from scipy import floor
 
 import sys, os
@@ -869,7 +869,7 @@ class AlkaliAtom(object):
             temp = j1
             j1 = j2
             j2 = temp
-        s = round(float((l1-l2+1.0))/2.0+j2+l1+1.0+0.5)
+#        s = round(float((l1-l2+1.0))/2.0+j2+l1+1.0+0.5)
         return (-1)**(int((l2+l1+3.)/2.+0.5+j2))*\
                 sqrt((2.0*j2+1.0)*(2.0*l1+1.0))*\
                 Wigner6j(l1,l2,1,j2,j1,0.5)*\

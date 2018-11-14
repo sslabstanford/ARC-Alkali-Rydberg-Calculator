@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
-from scipy import floor, sqrt
+#from scipy import floor, sqrt
 from scipy.misc import factorial
-from sympy.physics.wigner import clebsch_gordan as CG_sympy
+#from sympy.physics.wigner import clebsch_gordan as CG_sympy
 from sympy.physics.wigner import wigner_3j as Wigner3j_sympy
 from sympy.physics.wigner import wigner_6j as Wigner6j_sympy
 from sympy import N as sympyEvaluate

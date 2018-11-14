@@ -10,28 +10,28 @@
 
 from __future__ import print_function
 
-from math import exp,log,sqrt
+from math import sqrt #,exp,log
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+from matplotlib.ticker import MultipleLocator #, FormatStrFormatter
 import numpy as np
-import re
-from .wigner import Wigner6j,Wigner3j,CG
-from scipy.constants import physical_constants, pi , epsilon_0, hbar
-from scipy.constants import k as C_k
-from scipy.constants import c as C_c
+#import re
+#from .wigner import Wigner6j,Wigner3j,CG
+from scipy.constants import physical_constants #, pi , epsilon_0, hbar
+#from scipy.constants import k as C_k
+#from scipy.constants import c as C_c
 from scipy.constants import h as C_h
 from scipy.constants import e as C_e
 from scipy.optimize import curve_fit
 
 # for matrices
-from numpy import zeros,savetxt, complex64,complex128
-from numpy.linalg import eigvalsh,eig,eigh
-from numpy.ma import conjugate
-from numpy.lib.polynomial import real
+#from numpy import zeros, savetxt, complex64,complex128
+from numpy.linalg import eigh #, eigvalsh,eig
+#from numpy.ma import conjugate
+#from numpy.lib.polynomial import real
 
-from scipy.sparse import lil_matrix,csr_matrix
-from scipy.sparse.linalg import eigsh
-from scipy.special.specfun import fcoef
+#from scipy.sparse import lil_matrix,csr_matrix
+#from scipy.sparse.linalg import eigsh
+#from scipy.special.specfun import fcoef
 
 import sys
 if sys.version_info > (2,):

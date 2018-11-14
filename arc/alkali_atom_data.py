@@ -86,10 +86,14 @@
 
 from __future__ import division, print_function, absolute_import
 
-from .alkali_atom_functions import *
+from .alkali_atom_functions import AlkaliAtom
 
 from scipy.constants import Rydberg as C_Rydberg
 from scipy.constants import m_e as C_m_e
+from scipy.constants import c as C_c
+from scipy.constants import physical_constants
+
+from math import log
 
 class Hydrogen(AlkaliAtom):
     """
