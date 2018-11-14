@@ -79,7 +79,7 @@ class StarkMap:
             >>> from arc import *
             >>> calc = StarkMap(Caesium())
             >>> calc.defineBasis(28, 0, 0.5, 0.5, 23, 32, 20)
-            >>> calc.diagonalise(np.linspace(00.,6000,600))
+            >>> calc.diagonalize(np.linspace(00.,6000,600))
             >>> print("%.5f MHz cm^2 / V^2 " % calc.getPolarizability())
             0.76705 MHz cm^2 / V^2
 
@@ -88,7 +88,7 @@ class StarkMap:
             >>> from arc import *
             >>> calc = StarkMap(Caesium())
             >>> calc.defineBasis(28, 0, 0.5, 0.5, 23, 32, 20)
-            >>> calc.diagonalise(np.linspace(00.,60000,600))
+            >>> calc.diagonalize(np.linspace(00.,60000,600))
             >>> calc.plotLevelDiagram()
             >>> calc.showPlot()
             << matplotlib plot will open containing a Stark map >>
@@ -158,7 +158,7 @@ class StarkMap:
         Saves electric field (in units of V/m) for which energy levels are calculated
 
         See also:
-            :obj:`y`, :obj:`highlight`, :obj:`diagonalise`
+            :obj:`y`, :obj:`highlight`, :obj:`diagonalize`
         """
         self.y = []  # eigenValues
         """
@@ -168,7 +168,7 @@ class StarkMap:
         cm :math:`{}^{-1}` relative to the ionization threshold.
 
         See also:
-            :obj:`eFieldList`, :obj:`highlight`, :obj:`diagonalise`
+            :obj:`eFieldList`, :obj:`highlight`, :obj:`diagonalize`
         """
         self.highlight = [] #contribution of initial state there (overlap |<original state | given state>|^2)
         """
@@ -176,10 +176,10 @@ class StarkMap:
         eigenstates at electric field intensity `eFieldList[i]`. E.g. `highlight[i][j]`
         measures highlighted feature of the state with energy `y[i][j]` at electric
         field `eFieldList[i]`. What will be highlighted feature is defined in the
-        call of :obj:`diagonalise` (see that part of documentation for details).
+        call of :obj:`diagonalize` (see that part of documentation for details).
 
         See also:
-            :obj:`eFieldList`, :obj:`y`, :obj:`diagonalise`
+            :obj:`eFieldList`, :obj:`y`, :obj:`diagonalize`
         """
 
         # pointers towards figure
@@ -344,7 +344,7 @@ class StarkMap:
         self.eFieldCouplingSaved = False
         return 0
 
-    def diagonalise(self,eFieldList,drivingFromState = [0,0,0,0,0],
+    def diagonalize(self,eFieldList,drivingFromState = [0,0,0,0,0],
                         progressOutput=False,debugOutput=False):
         """
             Finds atom eigenstates in a given electric field
@@ -417,7 +417,7 @@ class StarkMap:
                 "given laser polarization, is uncoupled from the specified Stark "+\
                 "manifold. If you just want to see the specified Stark manifold "+\
                 "remove driveFromState optional argument from call of function "+\
-                "diagonalise. Or specify state and driving that is coupled "+\
+                "diagonalize. Or specify state and driving that is coupled "+\
                 "to a given manifold to see coupling strengths.")
 
         # ========= FIND LASER COUPLINGS (END) =======
@@ -816,7 +816,7 @@ class StarkMap:
         if (self.drivingFromState[0]!=0):
             raise Exception("Program can only find Polarizability of the original "+\
             "state if you highlight original state. You can do so by NOT "+\
-            "specifying drivingFromState in diagonalise function.")
+            "specifying drivingFromState in diagonalize function.")
 
 
         eFieldList = self.eFieldList

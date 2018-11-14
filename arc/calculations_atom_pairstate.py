@@ -20,7 +20,7 @@
             calc1.defineBasis( 0., 0., 4, 5,10e9)
             # optionally we can save now results of calculation for future use
             saveCalculation(calc1,"mycalculation.pkl")
-            calculation1.diagonalise(linspace(1,10.0,30),250,progressOutput = True,drivingFromState=[6,1,0.5,0.5,0])
+            calculation1.diagonalize(linspace(1,10.0,30),250,progressOutput = True,drivingFromState=[6,1,0.5,0.5,0])
             calc1.plotLevelDiagram()
             calc1.ax.set_xlim(1,10)
             calc1.ax.set_ylim(-2,2)
@@ -67,7 +67,7 @@ from scipy.sparse.linalg import eigsh
 from scipy.special import factorial
 
 #from .alkali_atom_functions import *
-import alkali_atom_functions as aaf
+import arc.alkali_atom_functions as aaf
 from .alkali_atom_functions import _atomLightAtomCoupling #, _EFieldCoupling
 from .calculations_atom_single import StarkMap
 
@@ -1111,7 +1111,7 @@ class PairStateInteractions:
         self.__closeDatabaseForMemoization()
 
 
-    def diagonalise(self,rangeR,noOfEigenvectors,
+    def diagonalize(self,rangeR,noOfEigenvectors,
                          drivingFromState = [0,0,0,0,0],
                          eigenstateDetuning = 0.,
                          sortEigenvectors = False,
@@ -1398,7 +1398,7 @@ class PairStateInteractions:
                  self.drivingFromState[4]))
 
         else:
-            commonHeader += " ! Energy levels not yet found (this is done by calling diagonalise method).\n"
+            commonHeader += " ! Energy levels not yet found (this is done by calling diagonalize method).\n"
 
 
 
@@ -1643,7 +1643,7 @@ class PairStateInteractions:
 
             Note:
                 In order to use this functions, highlighting in
-                :obj:`diagonalise` should be based on the original pair
+                :obj:`diagonalize` should be based on the original pair
                 state contribution of the eigenvectors (that this,
                 `drivingFromState` parameter should not be set, which
                 corresponds to `drivingFromState` = [0,0,0,0,0]).
@@ -1774,7 +1774,7 @@ class PairStateInteractions:
 
             Note:
                 In order to use this functions, highlighting in
-                :obj:`diagonalise` should be based on the original pair
+                :obj:`diagonalize` should be based on the original pair
                 state contribution of the eigenvectors (that this,
                 `drivingFromState` parameter should not be set, which
                 corresponds to `drivingFromState` = [0,0,0,0,0]).
@@ -1930,7 +1930,7 @@ class PairStateInteractions:
 
             Note:
                 In order to use this functions, highlighting in
-                :obj:`diagonalise` should be based on the original pair
+                :obj:`diagonalize` should be based on the original pair
                 state contribution of the eigenvectors (that this,
                 `drivingFromState` parameter should not be set, which
                 corresponds to `drivingFromState` = [0,0,0,0,0]).
@@ -2148,7 +2148,7 @@ class StarkMapResonances:
         sm1.defineBasis(self.state1[0],self.state1[1],self.state1[2],\
                         self.state1[3], nMin, nMax, maxL, Bz=self.Bz,\
                         progressOutput = progressOutput)
-        sm1.diagonalise(eFieldList,  progressOutput = progressOutput)
+        sm1.diagonalize(eFieldList,  progressOutput = progressOutput)
         if (self.atom2 is self.atom1) and \
             (self.state1[0]==self.state2[0]) and \
             (self.state1[1]==self.state2[1]) and \
@@ -2160,7 +2160,7 @@ class StarkMapResonances:
             sm2.defineBasis(self.state2[0],self.state2[1],self.state2[2],\
                             self.state2[3], nMin, nMax, maxL, Bz=self.Bz,\
                             progressOutput = progressOutput)
-            sm2.diagonalise(eFieldList,  progressOutput = progressOutput)
+            sm2.diagonalize(eFieldList,  progressOutput = progressOutput)
 
 
         self.originalStateY = []
@@ -2210,12 +2210,12 @@ class StarkMapResonances:
         for dm1 in dmlist1:
             sm1.defineBasis(n1,l1,j1,mj1+dm1, nMin, nMax, maxL, Bz=self.Bz,\
                         progressOutput = progressOutput)
-            sm1.diagonalise(eFieldList,  progressOutput = progressOutput)
+            sm1.diagonalize(eFieldList,  progressOutput = progressOutput)
 
             for dm2 in dmlist2:
                 sm2.defineBasis(n2,l2,j2,mj2+dm2, nMin, nMax, maxL, Bz=self.Bz,\
                             progressOutput = progressOutput)
-                sm2.diagonalise(eFieldList,  progressOutput = progressOutput)
+                sm2.diagonalize(eFieldList,  progressOutput = progressOutput)
 
                 for i in xrange(len(sm1.eFieldList)):
                     yList = []
