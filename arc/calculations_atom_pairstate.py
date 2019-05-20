@@ -343,6 +343,7 @@ class PairStateInteractions:
 
                         sumPol = 0.0  # sum over polarisations
                         limit = min(c1,c2)
+                        
                         for p in xrange(-limit,limit+1):
                             sumPol = sumPol + \
                                      self.fcp[c1,c2,p + self.interactionsUpTo] * \
@@ -560,6 +561,12 @@ class PairStateInteractions:
                          self.atom.getZeemanEnergyShift(
                               self.ll, self.jj, self.m2,
                               self.Bz)) / C_h * 1.0e-9  # in GHz
+        
+        ## ultimately we need to also include the electric field here!
+        ## still need to send in electric field and polarization to this function (makerawmatrix2)
+        ## starkShift = 
+            
+        
 
         if debugOutput:
             print("\n ======= Coupling strengths (radial part only) =======\n")
@@ -576,7 +583,7 @@ class PairStateInteractions:
                                           states[opi][3],states[opi][4],states[opi][5],
                                           states[i][0],states[i][1],states[i][2],
                                           states[i][3],states[i][4],states[i][5]) / C_h * 1.0e-9\
-                 - opZeemanShift
+                 - opZeemanShift # - starkShift
 
             pairState1 = "|"+aaf.printStateString(states[i][0],states[i][1],states[i][2])+\
                         ","+aaf.printStateString(states[i][3],states[i][4],states[i][5])+">"
@@ -880,7 +887,7 @@ class PairStateInteractions:
 
 
     def defineBasis(self,theta,phi,nRange,lrange,energyDelta,\
-                         Bz=0, progressOutput=False,debugOutput=False):
+                         Bz=0, progressOutput=False,debugOutput=False,Ez = 0, forceNolimitMj = False):
         """
             Finds relevant states in the vicinity of the given pair-state
 
@@ -918,6 +925,13 @@ class PairStateInteractions:
                 debugOutput (bool): optional, False by default. If true, similar
                     to progressOutput=True, this will print information about the
                     progress of calculations, but with more verbose output.
+                    
+            Args we added (NOTE: the electric field hasn't been fully implemented or tested yet):
+                Ez: electric field along z-axis (can be later changed to be in any direction).
+                    For now we'll set this up so it doesn't affect the basis, only the interaction matrices.
+                forceNolimitMj: can use to force the program not to limit the basis to only accessible mj states.
+                    This will make the calculation substantially slower, but can be used when we want the entire 
+                    interaction matrix independent of the states picked for the pair state.
 
             See also:
                 :obj:`alkali_atom_functions.saveCalculation` and
@@ -930,13 +944,13 @@ class PairStateInteractions:
         # save call parameters
         self.theta = theta; self.phi = phi; self.nRange = nRange;
         self.lrange = lrange; self.energyDelta = energyDelta
-        self.Bz = Bz
+        self.Bz = Bz; self.Ez = Ez;
 
         # wignerDmatrix
         wgd = wignerDmatrix(theta,phi)
 
         limitBasisToMj = False
-        if (theta<0.001):
+        if (theta<0.001 and not forceNolimitMj):
             limitBasisToMj = True  # Mj will be conserved in calculations
 
         originalMj = self.m1+self.m2
@@ -1042,7 +1056,31 @@ class PairStateInteractions:
                                            self.basisStates[i][6],
                                            self.basisStates[i][7],
                                            self.Bz)) / C_h * 1.0e-9   # in GHz
-                        matDiagonalConstructor[0].append(ed + zeemanShift +
+                        
+#                        ## testing out adding in an eletric field dependence (in the z direction)
+#                        ## first calculating the polarizability from second order perturbation theory - not sure if this works correctly
+#                        ## maybe I could replace this and do it in the for loops above???
+#                        def getPolFromSecondOrderPertTheory(n0,l0,j0,mj0,q=0):
+#                            nRange = np.concatenate((np.arange(n0-self.nrange,n0,1),np.arange(n0+1,n0+self.nrange,1)))
+#                            pertTheorySum = 0
+#                            for n1 in nRange: 
+#                                for l1 in [l0-1,l0,l0+1]:
+#                                    for j1 in [l1-0.5,l1+0.5]:
+#                                        if((j1 != 0 or j0 != 0) and j1 >=0 and np.abs(mj0+q) <= j1):
+#                                            dipMatElem = self.atom.getDipoleMatrixElement(n0,l0,j0,mj0,n1,l1,j1,mj0+q,q)
+#                                            dipMatElemSI = dipMatElem*C_e*physical_constants["Bohr radius"][0]
+#                                            energyDifference = (self.atom.getEnergy(n0,l0,j0)- self.atom.getEnergy(n1,l1,j1))*C_e
+#                                            pertTheorySum += (dipMatElemSI)**2/energyDifference
+#                            return(2*pertTheorySum/(10**2*(C_h/2*np.pi)))
+#                        
+#                        ## then using that to calculate energy shift    
+#                        starkShift = -0.5*(getPolFromSecondOrderPertTheory(self.basisStates[i][0],self.basisStates[i][1],
+#                                           self.basisStates[i][2],self.basisStates[i][3]) +\
+#                                           getPolFromSecondOrderPertTheory(self.basisStates[i][4],self.basisStates[i][5],
+#                                           self.basisStates[i][6],self.basisStates[i][7]))*self.Ez**2
+
+                        
+                        matDiagonalConstructor[0].append(ed + zeemanShift + # starkShift +
                                                          degeneracyOffset)
                         degeneracyOffset +=  0.00000001
                         matDiagonalConstructor[1].append(i)
@@ -1169,6 +1207,9 @@ class PairStateInteractions:
         self.highlight = []
         # what are the dominant contributing states?
         self.composition = []
+        
+        # this should return the composition but as eigenvectors (with respect to basis states) instead of strings
+        self.eigVecs = []
 
         if (noOfEigenvectors>=dimension-1):
             noOfEigenvectors=dimension-1
@@ -1313,14 +1354,18 @@ class PairStateInteractions:
                 # if we've defined from which state we are driving
                 sh = []
                 comp = []
+                eigs = []
                 for i in xrange(len(ev)):
                     sh.append(abs(egvector[self.originalPairStateIndex,i])**2)
                     comp.append(self._stateComposition(egvector[:,i]))
+                    eigs.append(egvector[:,i])
                 self.highlight.append(sh)
                 self.composition.append(comp)
+                self.eigVecs.append(eigs)
             else:
                 sh = []
                 comp = []
+                eigs = []
                 for i in xrange(len(ev)):
                     sumCoupledStates = 0.
                     for j in xrange(dimension):
@@ -1328,8 +1373,10 @@ class PairStateInteractions:
                                                 abs(egvector[j,i])**2
                     comp.append(self._stateComposition(egvector[:,i]))
                     sh.append(sumCoupledStates)
+                    eigs.append(egvector[:,i])
                 self.highlight.append(sh)
                 self.composition.append(comp)
+                self.eigVecs.append(eigs)
 
         # end of FOR loop over inter-atomic dinstaces
 
