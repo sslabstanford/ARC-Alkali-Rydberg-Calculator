@@ -906,8 +906,8 @@ class StarkMap:
             self.ax.plot(xOriginalState,y_fit,"r--")
             self.ax.legend(("fitted model function","calculated energy level"),\
                       loc=1,fontsize=10)
-
             self.ax.set_ylim(min(yOriginalState),max(yOriginalState))
+            self.ax.grid()
 
             plt.show()
 
