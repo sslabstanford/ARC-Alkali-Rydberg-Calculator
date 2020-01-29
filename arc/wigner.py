@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
-#from scipy import floor, sqrt
-from scipy.misc import factorial
-#from sympy.physics.wigner import clebsch_gordan as CG_sympy
+from scipy import floor, sqrt
+from scipy.special  import factorial
+from sympy.physics.wigner import clebsch_gordan as CG_sympy
 from sympy.physics.wigner import wigner_3j as Wigner3j_sympy
 from sympy.physics.wigner import wigner_6j as Wigner6j_sympy
 from sympy import N as sympyEvaluate
@@ -20,11 +20,13 @@ else:
 
 wignerPrecal = True  # use precalculated values - tested only for the main algorithm calls
 wignerPrecalJmax = 23
-wignerPrecal3j = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)),\
-                                      "data","precalculated3j.npy"), encoding = 'latin1')
+wignerPrecal3j = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                      "data","precalculated3j.npy"),
+                         encoding = 'latin1', allow_pickle=True)
 
-wignerPrecal6j = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)),\
-                         "data","precalculated6j.npy"), encoding = 'latin1')
+wignerPrecal6j = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                      "data","precalculated6j.npy"),
+                         encoding = 'latin1', allow_pickle=True)
 
 def Wigner3j(j1,j2,j3,m1,m2,m3):
 
@@ -209,7 +211,7 @@ def TriaCoeff(a,b,c):
 # Jojann Goetz
 
 from scipy.special import jv, legendre, sph_harm, jacobi
-from scipy.misc import  comb
+from scipy.special import  comb
 from numpy import floor, sqrt, sin, cos, exp, power
 from numpy import conj as conjugate
 from math import pi

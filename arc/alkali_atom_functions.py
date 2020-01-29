@@ -22,25 +22,21 @@ import numpy as np
 import re
 import shutil
 
-from .wigner import Wigner6j,Wigner3j,CG,wignerDmatrix #, wignerD
+
+from .wigner import Wigner6j, Wigner3j, CG, wignerDmatrix
 from scipy.constants import physical_constants, pi , epsilon_0, hbar
 from scipy.constants import k as C_k
 from scipy.constants import c as C_c
 from scipy.constants import h as C_h
 from scipy.constants import e as C_e
 from scipy.constants import m_e as C_m_e
-#from scipy.optimize import curve_fit
-
 # for matrices
-from numpy import zeros #, savetxt, complex64,complex128
-#from numpy.linalg import eigvalsh,eig,eigh
-#from numpy.ma import conjugate
-#from numpy.lib.polynomial import real
+from numpy.linalg import eigvalsh,eig,eigh
+from numpy.ma import conjugate
+from numpy.lib.polynomial import real
 
 from scipy.sparse import csr_matrix
-#from scipy.sparse import kron as kroneckerp
-#from scipy.sparse.linalg import eigsh
-#from scipy.special.specfun import fcoef
+from scipy.special.specfun import fcoef
 from scipy import floor
 
 import sys, os
@@ -184,7 +180,7 @@ class AlkaliAtom(object):
             try:
                 data = np.load(os.path.join(self.dataFolder,\
                                             self.dipoleMatrixElementFile),\
-                               encoding = 'latin1')
+                               encoding = 'latin1', allow_pickle=True)
             except IOError as e:
                 print("Error reading dipoleMatrixElement File "+\
                     os.path.join(self.dataFolder,self.dipoleMatrixElementFile))
@@ -217,7 +213,7 @@ class AlkaliAtom(object):
             try:
                 data = np.load(os.path.join(self.dataFolder,\
                                             self.quadrupoleMatrixElementFile),\
-                               encoding = 'latin1')
+                               encoding = 'latin1', allow_pickle=True)
 
             except IOError as e:
                 print("Error reading quadrupoleMatrixElementFile File "+\
@@ -1343,7 +1339,8 @@ class AlkaliAtom(object):
                                                     temperature)
         # sum over additional states
         for state in self.extraLevels:
-            if (abs(j-state[2])<0.6) and (state[2]!= l):
+            if (abs(j-state[2])<1.1) and \
+                (abs(state[1]- l)<1.1) and (abs(state[1]- l) > 0.9):
                 transitionRate += self.getTransitionRate(n,l,j,\
                                                     state[0],state[1],state[2],\
                                                     temperature)
@@ -1582,7 +1579,7 @@ class AlkaliAtom(object):
         return False,0,[]
 
     def getZeemanEnergyShift(self, l, j, mj, magneticFieldBz):
-        """
+        r"""
             Retuns linear (paramagnetic) Zeeman shift.
 
             :math:`\mathcal{H}_P=\frac{\mu_B B_z}{\hbar}(\hat{L}_{\rm z}+g_{\rm S}S_{\rm z})`
@@ -1879,14 +1876,14 @@ def loadSavedCalculation(fileName):
 # =================== State generation and printing (START) ===================
 
 def singleAtomState(j,m):
-    a = zeros((int(round(2.0*j+1.0,0)),1),dtype=np.complex128)
+    a = np.zeros((int(round(2.0*j+1.0,0)),1),dtype=np.complex128)
     a[int(round(j+m,0))] = 1
     return a
     return csr_matrix(([1], ([j+m], [0])),
                                        shape=(round(2.0*j+1.0,0),1))
 
 def compositeState(s1,s2):
-    a = zeros((s1.shape[0]*s2.shape[0],1),dtype=np.complex128)
+    a = np.zeros((s1.shape[0]*s2.shape[0],1),dtype=np.complex128)
     index = 0
     for br1 in xrange(s1.shape[0]):
         for br2 in xrange(s2.shape[0]):

@@ -56,11 +56,9 @@ from scipy.constants import e as C_e
 from scipy.optimize import curve_fit
 
 # for matrices
-from numpy import zeros #,savetxt, complex64,complex128
-#from numpy.linalg import eigvalsh,eig,eigh
 from numpy.ma import conjugate
 from numpy.lib.polynomial import real
-from scipy.sparse import csr_matrix #, lil_matrix
+from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
 #from scipy.special.specfun import fcoef
 #from scipy import floor
@@ -316,9 +314,11 @@ class PairStateInteractions:
             exit()
 
 
-        am = zeros((int(round((2*j1+1)*(2*j2+1),0)),\
-                    int(round((2*j+1)*(2*jj+1),0))),dtype=np.float64)
+        am = np.zeros((int(round((2*j1+1)*(2*j2+1),0)),\
+                       int(round((2*j+1)*(2*jj+1),0))),dtype=np.float64)
 
+        if (c1 > self.interactionsUpTo) or (c2 > self.interactionsUpTo):
+            return am
 
         j1range = np.linspace(-j1,j1,round(2*j1)+1)
         j2range = np.linspace(-j2,j2,round(2*j2)+1)
@@ -403,7 +403,7 @@ class PairStateInteractions:
         try:
             fileHandle =  gzip.GzipFile(os.path.join(self.dataFolder,\
                                                      self.angularMatrixFile_meta),'rb')
-            data = np.load(fileHandle, encoding = 'latin1')
+            data = np.load(fileHandle, encoding = 'latin1', allow_pickle=True)
             fileHandle.close()
         except :
             print("Note: No saved angular matrix metadata files to be loaded.")
@@ -438,10 +438,11 @@ class PairStateInteractions:
             return
 
         try:
-            fileHandle =  gzip.GzipFile(os.path.join(self.dataFolder,\
+            fileHandle =  gzip.GzipFile(os.path.join(self.dataFolder,
                                                     self.angularMatrixFile),'rb')
-            self.savedAngularMatrix_matrix = np.load(fileHandle,\
-                                                     encoding = 'latin1').tolist()
+            self.savedAngularMatrix_matrix = np.load(fileHandle,
+                                                     encoding = 'latin1',
+                                                     allow_pickle=True).tolist()
             fileHandle.close()
         except :
             print("Note: No saved angular matrix files to be loaded.")
@@ -527,7 +528,12 @@ class PairStateInteractions:
                                     and (not (self.interactionsUpTo==1) or\
                                          (Lmod2 == ((l1+l2)%2) ) )
                                     and ((not limitBasisToMj) or \
-                                         (j1+j2+0.1>self.m1+self.m2) )    ):
+                                         (j1+j2+0.1>self.m1+self.m2) )
+                                    and (n1 >= self.atom.groundStateN or
+                                         [n1, l1, j1] in  self.atom.extraLevels)
+                                    and (n2 >= self.atom.groundStateN or
+                                         [n2, l2, j2] in self.atom.extraLevels)
+                                    ):
 
                                     if debugOutput:
                                         pairState = "|"+aaf.printStateString(n1,l1,j1)+\
@@ -821,8 +827,10 @@ class PairStateInteractions:
 
         for n1 in xrange(max(self.n-nRange,1),self.n+nRange+1):
             for n2 in xrange(max(self.nn-nRange,1),self.nn+nRange+1):
-                for l1 in xrange(lmin1,self.l+2,2):
-                    for l2 in xrange(lmin2,self.ll+2,2):
+                lmax1 = min(self.l + 2, n1)
+                for l1 in xrange(lmin1, lmax1, 2):
+                    lmax2 = min(self.ll + 2, n2)
+                    for l2 in xrange(lmin2, lmax2, 2):
                         j1 = l1-0.5
                         if l1 == 0:
                             j1 = 0.5
@@ -836,9 +844,14 @@ class PairStateInteractions:
                                                                   self.nn,self.ll,self.jj,\
                                                                   n1,l1,j1,\
                                                                   n2,l2,j2)/C_h
-                                if abs(getEnergyDefect)<energyDelta  \
-                                    and (not (self.interactionsUpTo==1) or\
-                                         (Lmod2 == ((l1+l2)%2) )) :
+                                if (abs(getEnergyDefect)<energyDelta
+                                    and (not (self.interactionsUpTo==1) or
+                                         (Lmod2 == ((l1+l2)%2) ))
+                                    and (n1 >= self.atom.groundStateN or
+                                         [n1, l1, j1] in  self.atom.extraLevels)
+                                    and (n2 >= self.atom.groundStateN or
+                                         [n2, l2, j2] in self.atom.extraLevels)
+                                    ):
                                     getEnergyDefect = getEnergyDefect*1.0e-9 # GHz
 
                                     # calculate radial part
@@ -1511,7 +1524,8 @@ class PairStateInteractions:
              (aaf.printStateStringLatex(n1, l1, j1),int(2*mj1),\
               aaf.printStateStringLatex(n2, l2, j2),int(2*mj2))
 
-    def plotLevelDiagram(self,  highlightColor='red'):
+    def plotLevelDiagram(self,  highlightColor='red',
+                         highlightScale='linear'):
         """
             Plots pair state level diagram
 
@@ -1520,13 +1534,25 @@ class PairStateInteractions:
             Args:
                 highlightColor (string): optional, specifies the colour used
                     for state highlighting
-
+                highlightScale (string): optional, specifies scaling of
+                    state highlighting. Default is 'linear'. Use 'log-2' or
+                    'log-3' for logarithmic scale going down to 1e-2 and 1e-3
+                    respectively. Logarithmic scale is useful for spotting
+                    weakly admixed states.
         """
 
         rvb = LinearSegmentedColormap.from_list('mymap',\
                                                  ['0.9', highlightColor])
 
-        cNorm  = matplotlib.colors.Normalize(vmin=0., vmax=1.)
+        if highlightScale == 'linear':
+            cNorm = matplotlib.colors.Normalize(vmin=0., vmax=1.)
+        elif highlightScale == 'log-2':
+            cNorm = matplotlib.colors.LogNorm(vmin=1e-2, vmax=1)
+        elif highlightScale == 'log-3':
+            cNorm = matplotlib.colors.LogNorm(vmin=1e-3, vmax=1)
+        else:
+            raise ValueError("Only 'linear', 'log-2' and 'log-3' are valid "
+                             "inputs for highlightScale")
 
         print(" Now we are plotting...")
         self.fig, self.ax = plt.subplots(1, 1,figsize=(11.5,5.0))

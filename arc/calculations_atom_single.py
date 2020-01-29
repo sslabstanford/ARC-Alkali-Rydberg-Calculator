@@ -24,10 +24,9 @@ from scipy.constants import e as C_e
 from scipy.optimize import curve_fit
 
 # for matrices
-#from numpy import zeros, savetxt, complex64,complex128
-from numpy.linalg import eigh #, eigvalsh,eig
-#from numpy.ma import conjugate
-#from numpy.lib.polynomial import real
+from numpy.linalg import eigh
+from numpy.ma import conjugate
+from numpy.lib.polynomial import real
 
 #from scipy.sparse import lil_matrix,csr_matrix
 #from scipy.sparse.linalg import eigsh
