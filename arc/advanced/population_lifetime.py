@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import lmfit
 from scipy.integrate import odeint
-from lmfit import minimize, Parameters, Parameter, report_fit
-from scipy.integrate import odeint
+from lmfit import minimize, Parameters, report_fit
 from ..alkali_atom_data import *
-
+import matplotlib.pyplot as plt
 
 """
     **Contributors:**
@@ -205,8 +203,6 @@ def getPopulationLifetime(atom, n, l, j,
     partg = 2.0
 
     #########################################################
-    # What is the ground state?
-    NGround = atom.groundStateN
 
     # It takes into account of the extra levels
     extraL = atom.extraLevels[1][:]
@@ -421,7 +417,7 @@ def getPopulationLifetime(atom, n, l, j,
             """Lotka-Volterra predator-prey model."""
             try:
                 gammaTarget = ps['gammaTarget'].value
-            except:
+            except Exception:
                 gammaTarget = ps
 
             x, y = xs
@@ -506,7 +502,7 @@ def getPopulationLifetime(atom, n, l, j,
             try:
                 gammaEnsemble = ps['gammaEnsemble'].value
                 gammaTarget = ps['gammaTarget'].value
-            except:
+            except Exception:
                 gammaEnsemble, gammaTarget = ps
 
             x, y = xs
@@ -585,7 +581,7 @@ def getPopulationLifetime(atom, n, l, j,
                 gammaTargetBBR = ps['gammaTargetBBR'].value
                 gammaSupportSpont = ps['gammaSupportSpont'].value
                 gammaSupportBBR = ps['gammaSupportBBR'].value
-            except:
+            except Exception:
                 gammaTargetSpont, gammaTargetBBR, gammaSupportSpont, gammaSupportBBR = ps
 
             x, y, z = xs
@@ -611,7 +607,6 @@ def getPopulationLifetime(atom, n, l, j,
             ListRedAus[i] = max(ListRed) - ListRed[i]
 
         t = np.array(ListTime)
-        x0 = np.array([0, 0, 0])
 
         data = np.zeros(shape=(len(t), 3))
 

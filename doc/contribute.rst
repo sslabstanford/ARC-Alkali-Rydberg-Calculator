@@ -1,20 +1,37 @@
 How to contribute to the project
 ================================
 
-Ideally, this package/library will grow into a community project, as a community-maintained resource for atomic physics community. Full code will be accessible from GitHub, so please fork the project, and submit improvements, additional modules, new features, or just suggest ideas. We have a list of features that can be potentially included.
+Both new data and calculations for the core library are welcome. We will also
+include codes that solve specific research questions in the `arc.advanced <./advanced.html>`_ .
+Ideally, this package/library will grow into a community project,
+as a community-maintained resource for atomic physics community. Full code is
+accessible from `GitHub <https://github.com/nikolasibalic/ARC-Alkali-Rydberg-Calculator>`_, so please fork the project, and submit improvements,
+additional modules, new features, or just suggest ideas.
+For inspiration, we have a list of possible features for developent below.
 
 
 Ideas for development
 ---------------------
 This is incomplete list of some of the modules that can be added to the library:
 
-    * Dressing potentials
-    * Magic wavelengths
-    * Atom-wall interactions
     * Photoionization
     * Collisional cross-sections
-    * Tensor polarisability
+    * Dressing potentials
+    * New methods for precise calculation of DME
+    * Hyperfine structure calculations
     * ... (add your own ideas)
+
+Before you start
+----------------
+
+You can contribute code to core of the ARC library, or add specific calculation
+example to `arc.advanced`. It is highly recommended, especially if you aim
+expanding the core of the library, to open an Issue on GitHub ARC page
+and discuss idea with main developers to make sure that good structure is
+chosen, that no one else is working at the same idea at the same moment,
+and that existing ARC calculations are reused where possible. The quick
+discussion should enable smoother development and quicker integration of your
+contribution to the main package.
 
 Naming conventions
 ------------------
@@ -27,7 +44,7 @@ For the sake of consistency, readability and cross-linking with the written lite
 
  * Use long self-descriptive variable names (so that the code is self-documented and readable in itself) and write short comment on functions of code subsections.
 
- * Use Google style docstrings for code documentation (we are using Sphinx Napoleon extension for generating documentation)
+ * Use `Google style docstrings for code documentation <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_ (we are using Sphinx Napoleon extension for generating documentation)
 
  * Add references to original papers in comments and docstrings.
 
